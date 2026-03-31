@@ -39,6 +39,10 @@ export type CodeQuestion = {
 
 export type Question = McqQuestion | ShortQuestion | CodeQuestion
 
+// Distributive helper — strips correctAnswer from each member of the union individually
+type OmitCorrectAnswer<T> = T extends unknown ? Omit<T, "correctAnswer"> : never
+export type PlayerQuestion = OmitCorrectAnswer<Question>
+
 export type QuizWithQuestions = Quiz & {
 	questions: Question[]
 }
@@ -53,7 +57,7 @@ export type AttemptQuizSnapshot = {
 	title: string
 	description: string
 	timeLimitSeconds?: number
-	questions: Array<Omit<Question, "correctAnswer">>
+	questions: PlayerQuestion[]
 }
 
 export type AttemptStartResponse = {

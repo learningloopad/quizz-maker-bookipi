@@ -2,7 +2,6 @@ import { Link, Route, Routes } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import BuilderPage from "./pages/BuilderPage";
 import PlayPage from "./pages/PlayPage";
-import ResultsPage from "./pages/ResultsPage";
 
 export default function App() {
   return (
@@ -21,7 +20,6 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/builder" element={<BuilderPage />} />
           <Route path="/play" element={<PlayPage />} />
-          <Route path="/results" element={<ResultsPage />} />
         </Routes>
       </main>
     </div>
