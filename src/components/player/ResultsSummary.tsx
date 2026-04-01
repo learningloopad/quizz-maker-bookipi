@@ -1,4 +1,5 @@
 import type { SubmitAttemptResponse } from "../../types/quiz";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,8 +32,12 @@ export default function ResultsSummary({
   antiCheatSummary,
   onPlayAgain,
 }: Props) {
-  const totalQuestions = result.details.length;
-  const correctCount = result.details.filter((d) => d.correct).length;
+  const isCodeQuestion = (id: number) =>
+    questions.find((q) => q.id === id)?.type === "code";
+  const gradedDetails = result.details.filter((d) => !isCodeQuestion(d.questionId));
+  const pendingDetails = result.details.filter((d) => isCodeQuestion(d.questionId));
+  const totalQuestions = gradedDetails.length;
+  const correctCount = gradedDetails.filter((d) => d.correct).length;
 
   return (
     <div className="space-y-6">
@@ -43,6 +48,11 @@ export default function ResultsSummary({
           {correctCount} / {totalQuestions}
         </span>
         <span className="text-muted-foreground">correct</span>
+        {pendingDetails.length > 0 && (
+          <span className="text-sm text-muted-foreground ml-2">
+            ({pendingDetails.length} pending manual review)
+          </span>
+        )}
       </div>
 
       {antiCheatSummary && antiCheatSummary.total > 0 && (
@@ -68,11 +78,36 @@ export default function ResultsSummary({
         <h3 className="text-lg font-medium">Per-Question Breakdown</h3>
         {result.details.map((detail) => {
           const question = questions.find((q) => q.id === detail.questionId);
+          const isCode = question?.type === "code";
           const userAnswer = answers[detail.questionId] ?? "(no answer)";
           const displayAnswer =
             question?.type === "mcq" && question.options
               ? question.options[Number(userAnswer)] ?? userAnswer
               : userAnswer;
+
+          if (isCode) {
+            return (
+              <Card key={detail.questionId} className="border-yellow-200 bg-yellow-50/50">
+                <CardContent className="space-y-1.5">
+                  <Badge variant="outline" className="text-yellow-700 border-yellow-400">
+                    Pending Review
+                  </Badge>
+                  <p className="font-medium">
+                    {question?.prompt ?? "Unknown question"}
+                  </p>
+                  <Textarea
+                    value={userAnswer}
+                    readOnly
+                    rows={6}
+                    className="resize-none cursor-default bg-gray-100 font-mono text-sm text-gray-800 dark:bg-gray-800 dark:text-gray-200"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Code questions require manual grading.
+                  </p>
+                </CardContent>
+              </Card>
+            );
+          }
 
           return (
             <Card
@@ -85,7 +120,7 @@ export default function ResultsSummary({
             >
               <CardContent className="space-y-1.5">
                 <Badge variant={detail.correct ? "secondary" : "destructive"}>
-                  {detail.correct ? "✓ Correct" : "✗ Incorrect"}
+                  {detail.correct ? "Correct" : "Incorrect"}
                 </Badge>
                 <p className="font-medium">
                   {question?.prompt ?? "Unknown question"}

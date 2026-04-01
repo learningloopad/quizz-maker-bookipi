@@ -3,6 +3,7 @@ import { useAttemptSession } from "../hooks/useAttemptSession";
 import { useAntiCheat } from "../hooks/useAntiCheat";
 import McqAnswerView from "../components/player/McqAnswerView";
 import ShortAnswerView from "../components/player/ShortAnswerView";
+import CodeAnswerView from "../components/player/CodeAnswerView";
 import QuestionNav from "../components/player/QuestionNav";
 import ResultsSummary from "../components/player/ResultsSummary";
 import { Button } from "@/components/ui/button";
@@ -149,6 +150,12 @@ export default function PlayPage() {
                   currentAnswer !== undefined ? Number(currentAnswer) : null
                 }
                 onSelect={(index) => setAnswer(question.id, String(index))}
+              />
+            ) : question.type === "code" ? (
+              <CodeAnswerView
+                value={currentAnswer ?? ""}
+                onChange={(value) => setAnswer(question.id, value)}
+                onPaste={() => antiCheat.logPaste(question.id)}
               />
             ) : (
               <ShortAnswerView
