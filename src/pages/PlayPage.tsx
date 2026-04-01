@@ -5,6 +5,11 @@ import McqAnswerView from "../components/player/McqAnswerView";
 import ShortAnswerView from "../components/player/ShortAnswerView";
 import QuestionNav from "../components/player/QuestionNav";
 import ResultsSummary from "../components/player/ResultsSummary";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function PlayPage() {
   const [quizIdInput, setQuizIdInput] = useState("");
@@ -26,27 +31,25 @@ export default function PlayPage() {
   function handlePlayAgain() {
     setQuizIdInput("");
     setCurrentIndex(0);
-    reset();    antiCheat.reset()  }
+    reset();
+    antiCheat.reset();
+  }
 
   // Phase: idle — enter quiz ID
   if (session.phase === "idle") {
     return (
-      <section>
-        <h2>Take a Quiz</h2>
-        <div className="form-section">
-          <label className="field-label">
-            Quiz ID
-            <input
-              type="text"
-              value={quizIdInput}
-              onChange={(e) => setQuizIdInput(e.target.value)}
-              placeholder="Enter quiz ID..."
-              onKeyDown={(e) => e.key === "Enter" && handleStart()}
-            />
-          </label>
-          <button onClick={handleStart} className="btn-primary">
-            Start Quiz
-          </button>
+      <section className="space-y-4">
+        <h2 className="text-2xl font-semibold">Take a Quiz</h2>
+        <div className="space-y-2">
+          <Label htmlFor="quiz-id">Quiz ID</Label>
+          <Input
+            id="quiz-id"
+            value={quizIdInput}
+            onChange={(e) => setQuizIdInput(e.target.value)}
+            placeholder="Enter quiz ID..."
+            onKeyDown={(e) => e.key === "Enter" && handleStart()}
+          />
+          <Button onClick={handleStart}>Start Quiz</Button>
         </div>
       </section>
     );
@@ -55,9 +58,11 @@ export default function PlayPage() {
   // Phase: loading
   if (session.phase === "loading") {
     return (
-      <section>
-        <h2>Loading quiz...</h2>
-        <div className="progress-box">Starting attempt...</div>
+      <section className="space-y-4">
+        <h2 className="text-2xl font-semibold">Loading quiz...</h2>
+        <Alert>
+          <AlertDescription>Starting attempt...</AlertDescription>
+        </Alert>
       </section>
     );
   }
@@ -65,12 +70,12 @@ export default function PlayPage() {
   // Phase: error
   if (session.phase === "error") {
     return (
-      <section>
-        <h2>Error</h2>
-        <div className="error-box">{session.error}</div>
-        <button onClick={handlePlayAgain} className="btn-primary">
-          Try Again
-        </button>
+      <section className="space-y-4">
+        <h2 className="text-2xl font-semibold">Error</h2>
+        <Alert variant="destructive">
+          <AlertDescription>{session.error}</AlertDescription>
+        </Alert>
+        <Button onClick={handlePlayAgain}>Try Again</Button>
       </section>
     );
   }
@@ -78,9 +83,11 @@ export default function PlayPage() {
   // Phase: submitting
   if (session.phase === "submitting") {
     return (
-      <section>
-        <h2>Submitting...</h2>
-        <div className="progress-box">Grading your answers...</div>
+      <section className="space-y-4">
+        <h2 className="text-2xl font-semibold">Submitting...</h2>
+        <Alert>
+          <AlertDescription>Grading your answers...</AlertDescription>
+        </Alert>
       </section>
     );
   }
@@ -107,12 +114,12 @@ export default function PlayPage() {
 
     if (!question) {
       return (
-        <section>
-          <h2>Error</h2>
-          <div className="error-box">No questions found in this quiz.</div>
-          <button onClick={handlePlayAgain} className="btn-primary">
-            Try Again
-          </button>
+        <section className="space-y-4">
+          <h2 className="text-2xl font-semibold">Error</h2>
+          <Alert variant="destructive">
+            <AlertDescription>No questions found in this quiz.</AlertDescription>
+          </Alert>
+          <Button onClick={handlePlayAgain}>Try Again</Button>
         </section>
       );
     }
@@ -122,34 +129,36 @@ export default function PlayPage() {
     const allAnswered = answeredCount === questions.length;
 
     return (
-      <section>
-        <div className="quiz-player-header">
-          <h2>{session.attempt.quiz.title}</h2>
-          <p className="quiz-player-description">
+      <section className="space-y-5">
+        <div>
+          <h2 className="text-2xl font-semibold">{session.attempt.quiz.title}</h2>
+          <p className="text-sm text-muted-foreground mt-1">
             {session.attempt.quiz.description}
           </p>
         </div>
 
-        <div className="question-card">
-          <p className="question-prompt">{question.prompt}</p>
+        <Card>
+          <CardContent className="space-y-4">
+            <p className="font-medium">{question.prompt}</p>
 
-          {question.type === "mcq" && "options" in question && question.options ? (
-            <McqAnswerView
-              questionId={question.id}
-              options={question.options}
-              selectedIndex={
-                currentAnswer !== undefined ? Number(currentAnswer) : null
-              }
-              onSelect={(index) => setAnswer(question.id, String(index))}
-            />
-          ) : (
-            <ShortAnswerView
-              value={currentAnswer ?? ""}
-              onChange={(value) => setAnswer(question.id, value)}
-              onPaste={() => antiCheat.logPaste(question.id)}
-            />
-          )}
-        </div>
+            {question.type === "mcq" && "options" in question && question.options ? (
+              <McqAnswerView
+                questionId={question.id}
+                options={question.options}
+                selectedIndex={
+                  currentAnswer !== undefined ? Number(currentAnswer) : null
+                }
+                onSelect={(index) => setAnswer(question.id, String(index))}
+              />
+            ) : (
+              <ShortAnswerView
+                value={currentAnswer ?? ""}
+                onChange={(value) => setAnswer(question.id, value)}
+                onPaste={() => antiCheat.logPaste(question.id)}
+              />
+            )}
+          </CardContent>
+        </Card>
 
         <QuestionNav
           currentIndex={currentIndex}
@@ -160,17 +169,13 @@ export default function PlayPage() {
           }
         />
 
-        <div className="submit-section">
-          <span className="answered-count">
+        <div className="flex items-center justify-between border-t pt-4">
+          <span className="text-sm text-muted-foreground">
             {answeredCount} / {questions.length} answered
           </span>
-          <button
-            onClick={handleSubmit}
-            disabled={!allAnswered}
-            className="btn-primary"
-          >
+          <Button onClick={handleSubmit} disabled={!allAnswered}>
             Submit Quiz
-          </button>
+          </Button>
         </div>
       </section>
     );

@@ -1,4 +1,8 @@
 import type { SubmitAttemptResponse } from "../../types/quiz";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 type QuestionInfo = {
   id: number;
@@ -31,35 +35,37 @@ export default function ResultsSummary({
   const correctCount = result.details.filter((d) => d.correct).length;
 
   return (
-    <div className="results-summary">
-      <h2>Results</h2>
+    <div className="space-y-6">
+      <h2 className="text-2xl font-semibold">Results</h2>
 
-      <div className="score-box">
-        <span className="score-value">
+      <div className="flex items-baseline gap-2">
+        <span className="text-4xl font-bold">
           {correctCount} / {totalQuestions}
         </span>
-        <span className="score-label">correct</span>
+        <span className="text-muted-foreground">correct</span>
       </div>
 
       {antiCheatSummary && antiCheatSummary.total > 0 && (
-        <div className="anticheat-box">
-          <strong>Anti-Cheat Summary</strong>
-          <ul>
-            {antiCheatSummary.blurCount > 0 && (
-              <li>{antiCheatSummary.blurCount} tab switch(es)</li>
-            )}
-            {antiCheatSummary.focusCount > 0 && (
-              <li>{antiCheatSummary.focusCount} tab return(s)</li>
-            )}
-            {antiCheatSummary.pasteCount > 0 && (
-              <li>{antiCheatSummary.pasteCount} paste(s)</li>
-            )}
-          </ul>
-        </div>
+        <Alert>
+          <AlertTitle>Anti-Cheat Summary</AlertTitle>
+          <AlertDescription>
+            <ul className="list-disc pl-5 mt-1 space-y-0.5">
+              {antiCheatSummary.blurCount > 0 && (
+                <li>{antiCheatSummary.blurCount} tab switch(es)</li>
+              )}
+              {antiCheatSummary.focusCount > 0 && (
+                <li>{antiCheatSummary.focusCount} tab return(s)</li>
+              )}
+              {antiCheatSummary.pasteCount > 0 && (
+                <li>{antiCheatSummary.pasteCount} paste(s)</li>
+              )}
+            </ul>
+          </AlertDescription>
+        </Alert>
       )}
 
-      <div className="results-details">
-        <h3>Per-Question Breakdown</h3>
+      <div className="space-y-3">
+        <h3 className="text-lg font-medium">Per-Question Breakdown</h3>
         {result.details.map((detail) => {
           const question = questions.find((q) => q.id === detail.questionId);
           const userAnswer = answers[detail.questionId] ?? "(no answer)";
@@ -69,34 +75,36 @@ export default function ResultsSummary({
               : userAnswer;
 
           return (
-            <div
+            <Card
               key={detail.questionId}
-              className={`result-card ${detail.correct ? "result-correct" : "result-incorrect"}`}
+              className={
+                detail.correct
+                  ? "border-green-200 bg-green-50/50"
+                  : "border-red-200 bg-red-50/50"
+              }
             >
-              <div className="result-card-header">
-                <span className={`result-badge ${detail.correct ? "badge-correct" : "badge-incorrect"}`}>
+              <CardContent className="space-y-1.5">
+                <Badge variant={detail.correct ? "secondary" : "destructive"}>
                   {detail.correct ? "✓ Correct" : "✗ Incorrect"}
-                </span>
-              </div>
-              <p className="result-prompt">{question?.prompt ?? "Unknown question"}</p>
-              <p className="result-answer">
-                Your answer: <strong>{displayAnswer}</strong>
-              </p>
-              {!detail.correct && detail.expected && (
-                <p className="result-expected">
-                  Expected: <strong>{detail.expected}</strong>
+                </Badge>
+                <p className="font-medium">
+                  {question?.prompt ?? "Unknown question"}
                 </p>
-              )}
-            </div>
+                <p className="text-sm">
+                  Your answer: <strong>{displayAnswer}</strong>
+                </p>
+                {!detail.correct && detail.expected && (
+                  <p className="text-sm text-muted-foreground">
+                    Expected: <strong>{detail.expected}</strong>
+                  </p>
+                )}
+              </CardContent>
+            </Card>
           );
         })}
       </div>
 
-      <div className="button-row">
-        <button onClick={onPlayAgain} className="btn-primary">
-          Take Another Quiz
-        </button>
-      </div>
+      <Button onClick={onPlayAgain}>Take Another Quiz</Button>
     </div>
   );
 }

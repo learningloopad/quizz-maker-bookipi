@@ -4,12 +4,7 @@ import type {
 	CreateQuizInput,
 	Question,
 	Quiz,
-	QuizWithQuestions,
 } from "../types/quiz"
-
-export function listQuizzes() {
-	return apiRequest<Quiz[]>("/quizzes")
-}
 
 export function createQuiz(input: CreateQuizInput) {
 	return apiRequest<Quiz>("/quizzes", {
@@ -18,9 +13,6 @@ export function createQuiz(input: CreateQuizInput) {
 	})
 }
 
-export function getQuizById(quizId: number) {
-	return apiRequest<QuizWithQuestions>(`/quizzes/${quizId}`)
-}
 
 export function createQuestion(quizId: number, input: CreateQuestionInput) {
 	return apiRequest<Question>(`/quizzes/${quizId}/questions`, {

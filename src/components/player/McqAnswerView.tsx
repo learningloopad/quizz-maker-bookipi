@@ -1,3 +1,6 @@
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+
 type Props = {
   questionId: number;
   options: string[];
@@ -12,18 +15,18 @@ export default function McqAnswerView({
   onSelect,
 }: Props) {
   return (
-    <div className="mcq-answer-view">
+    <RadioGroup
+      value={selectedIndex !== null ? String(selectedIndex) : ""}
+      onValueChange={(val) => onSelect(Number(val))}
+    >
       {options.map((option, index) => (
-        <label key={index} className="mcq-option">
-          <input
-            type="radio"
-            name={`answer-${questionId}`}
-            checked={selectedIndex === index}
-            onChange={() => onSelect(index)}
-          />
-          <span>{option}</span>
-        </label>
+        <div key={index} className="flex items-center gap-2.5 rounded-lg border p-3 has-data-[checked]:border-primary has-data-[checked]:bg-primary/5">
+          <RadioGroupItem value={String(index)} id={`q${questionId}-opt${index}`} />
+          <Label htmlFor={`q${questionId}-opt${index}`} className="cursor-pointer font-normal">
+            {option}
+          </Label>
+        </div>
       ))}
-    </div>
+    </RadioGroup>
   );
 }

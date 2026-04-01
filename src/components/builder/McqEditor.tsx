@@ -1,4 +1,9 @@
 import type { DraftMcqQuestion, QuestionValidationErrors } from "../../types/quiz";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 type Props = {
   question: DraftMcqQuestion;
@@ -37,55 +42,58 @@ export default function McqEditor({ question, errors, onChange }: Props) {
   }
 
   return (
-    <div className="question-editor">
-      <label className="field-label">
-        Prompt
-        <textarea
+    <div className="space-y-3">
+      <div className="space-y-1">
+        <Label>Prompt</Label>
+        <Textarea
           value={question.prompt}
           onChange={(e) => updatePrompt(e.target.value)}
           placeholder="Enter question prompt..."
           rows={2}
         />
-        {errors?.prompt && <span className="field-error">{errors.prompt}</span>}
-      </label>
+        {errors?.prompt && (
+          <p className="text-sm text-destructive">{errors.prompt}</p>
+        )}
+      </div>
 
-      <div className="options-section">
-        <span className="field-label">Options (select correct answer)</span>
-        {question.options.map((option, index) => (
-          <div key={index} className="option-row">
-            <input
-              type="radio"
-              name={`correct-${question.id}`}
-              checked={question.correctAnswer === index}
-              onChange={() => selectCorrectAnswer(index)}
-            />
-            <input
-              type="text"
-              value={option}
-              onChange={(e) => updateOption(index, e.target.value)}
-              placeholder={`Option ${index + 1}`}
-            />
-            {question.options.length > 2 && (
-              <button
-                type="button"
-                onClick={() => removeOption(index)}
-                className="btn-icon"
-                title="Remove option"
-              >
-                ✕
-              </button>
-            )}
-          </div>
-        ))}
+      <div className="space-y-2">
+        <Label>Options (select correct answer)</Label>
+        <RadioGroup
+          value={question.correctAnswer >= 0 ? String(question.correctAnswer) : ""}
+          onValueChange={(val) => selectCorrectAnswer(Number(val))}
+        >
+          {question.options.map((option, index) => (
+            <div key={index} className="flex items-center gap-2">
+              <RadioGroupItem value={String(index)} />
+              <Input
+                value={option}
+                onChange={(e) => updateOption(index, e.target.value)}
+                placeholder={`Option ${index + 1}`}
+                className="flex-1"
+              />
+              {question.options.length > 2 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => removeOption(index)}
+                  title="Remove option"
+                >
+                  ✕
+                </Button>
+              )}
+            </div>
+          ))}
+        </RadioGroup>
         {errors?.options && (
-          <span className="field-error">{errors.options}</span>
+          <p className="text-sm text-destructive">{errors.options}</p>
         )}
         {errors?.correctAnswer && (
-          <span className="field-error">{errors.correctAnswer}</span>
+          <p className="text-sm text-destructive">{errors.correctAnswer}</p>
         )}
-        <button type="button" onClick={addOption} className="btn-small">
+        <Button type="button" variant="ghost" size="sm" onClick={addOption}>
           + Add option
-        </button>
+        </Button>
       </div>
     </div>
   );

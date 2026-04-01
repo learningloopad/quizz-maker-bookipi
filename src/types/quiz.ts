@@ -43,10 +43,6 @@ export type Question = McqQuestion | ShortQuestion | CodeQuestion
 type OmitCorrectAnswer<T> = T extends unknown ? Omit<T, "correctAnswer"> : never
 export type PlayerQuestion = OmitCorrectAnswer<Question>
 
-export type QuizWithQuestions = Quiz & {
-	questions: Question[]
-}
-
 export type AttemptAnswer = {
 	questionId: number
 	value: string

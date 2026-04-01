@@ -4,6 +4,11 @@ import { createEmptyDraft, createMcqQuestion, createShortQuestion } from "../uti
 import { hasErrors, validateQuizDraft } from "../utils/validation";
 import { useCreateQuizWithQuestions } from "../hooks/useCreateQuizWithQuestions";
 import QuestionCard from "../components/builder/QuestionCard";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function BuilderPage() {
   const [draft, setDraft] = useState<QuizDraft>(createEmptyDraft);
@@ -60,62 +65,62 @@ export default function BuilderPage() {
   // Success state
   if (status === "success" && quiz) {
     return (
-      <section>
-        <h2>Quiz Created!</h2>
-        <div className="success-box">
-          <p>
+      <section className="space-y-4">
+        <h2 className="text-2xl font-semibold">Quiz Created!</h2>
+        <Alert>
+          <AlertTitle>Success</AlertTitle>
+          <AlertDescription>
             Your quiz <strong>"{quiz.title}"</strong> was saved.
-          </p>
-          <p>
-            Quiz ID: <code className="quiz-id">{quiz.id}</code>
-          </p>
-          <p>Share this ID with anyone who should take the quiz.</p>
-        </div>
-        <div className="button-row">
-          <button onClick={handleReset} className="btn-primary">
-            Create Another
-          </button>
-        </div>
+            <br />
+            Quiz ID: <code className="rounded bg-muted px-1.5 py-0.5 text-lg font-semibold">{quiz.id}</code>
+            <br />
+            Share this ID with anyone who should take the quiz.
+          </AlertDescription>
+        </Alert>
+        <Button onClick={handleReset}>Create Another</Button>
       </section>
     );
   }
 
   return (
-    <section>
-      <h2>Quiz Builder</h2>
+    <section className="space-y-6">
+      <h2 className="text-2xl font-semibold">Quiz Builder</h2>
 
       {/* Quiz metadata */}
-      <div className="form-section">
-        <label className="field-label">
-          Title
-          <input
-            type="text"
+      <div className="space-y-3">
+        <div className="space-y-1">
+          <Label htmlFor="quiz-title">Title</Label>
+          <Input
+            id="quiz-title"
             value={draft.title}
             onChange={(e) => updateField("title", e.target.value)}
             placeholder="e.g. JavaScript Basics"
           />
-          {errors?.title && <span className="field-error">{errors.title}</span>}
-        </label>
+          {errors?.title && (
+            <p className="text-sm text-destructive">{errors.title}</p>
+          )}
+        </div>
 
-        <label className="field-label">
-          Description
-          <textarea
+        <div className="space-y-1">
+          <Label htmlFor="quiz-description">Description</Label>
+          <Textarea
+            id="quiz-description"
             value={draft.description}
             onChange={(e) => updateField("description", e.target.value)}
             placeholder="What is this quiz about?"
             rows={3}
           />
           {errors?.description && (
-            <span className="field-error">{errors.description}</span>
+            <p className="text-sm text-destructive">{errors.description}</p>
           )}
-        </label>
+        </div>
       </div>
 
       {/* Questions */}
-      <div className="form-section">
-        <h3>Questions</h3>
+      <div className="space-y-3">
+        <h3 className="text-lg font-medium">Questions</h3>
         {errors?.questions && (
-          <div className="field-error">{errors.questions}</div>
+          <p className="text-sm text-destructive">{errors.questions}</p>
         )}
 
         {draft.questions.map((question, index) => (
@@ -129,43 +134,45 @@ export default function BuilderPage() {
           />
         ))}
 
-        <div className="button-row">
-          <button
+        <div className="flex gap-2">
+          <Button
             type="button"
+            variant="outline"
+            size="sm"
             onClick={() => addQuestion("mcq")}
-            className="btn-secondary"
           >
             + Multiple Choice
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="outline"
+            size="sm"
             onClick={() => addQuestion("short")}
-            className="btn-secondary"
           >
             + Short Answer
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Save */}
-      <div className="form-section">
+      <div className="space-y-3">
         {status === "error" && error && (
-          <div className="error-box">{error}</div>
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         )}
 
         {status === "pending" && (
-          <div className="progress-box">
-            Saving... ({progress.current} / {progress.total})
-          </div>
+          <Alert>
+            <AlertDescription>
+              Saving... ({progress.current} / {progress.total})
+            </AlertDescription>
+          </Alert>
         )}
 
-        <button
-          onClick={handleSave}
-          disabled={status === "pending"}
-          className="btn-primary"
-        >
+        <Button onClick={handleSave} disabled={status === "pending"}>
           {status === "pending" ? "Saving..." : "Save Quiz"}
-        </button>
+        </Button>
       </div>
     </section>
   );
