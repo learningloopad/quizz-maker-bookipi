@@ -29,9 +29,16 @@ export function useAntiCheat(enabled: boolean) {
 		window.addEventListener("blur", onBlur)
 		window.addEventListener("focus", onFocus)
 
+		function onBeforeUnload(e: BeforeUnloadEvent) {
+			e.preventDefault()
+		}
+
+		window.addEventListener("beforeunload", onBeforeUnload)
+
 		return () => {
 			window.removeEventListener("blur", onBlur)
 			window.removeEventListener("focus", onFocus)
+			window.removeEventListener("beforeunload", onBeforeUnload)
 		}
 	}, [enabled])
 
