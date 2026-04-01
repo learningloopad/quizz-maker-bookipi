@@ -1,31 +1,15 @@
 import { useState } from "react"
+import { useMutation } from "@tanstack/react-query"
 import { createQuiz, createQuestion } from "../api/quizzes"
 import type { Quiz, QuizDraft, CreateQuestionInput } from "../types/quiz"
 
-type SaveState = {
-	status: "idle" | "saving" | "success" | "error"
-	quiz: Quiz | null
-	error: string | null
-	progress: { current: number; total: number }
-}
-
 export function useCreateQuizWithQuestions() {
-	const [state, setState] = useState<SaveState>({
-		status: "idle",
-		quiz: null,
-		error: null,
-		progress: { current: 0, total: 0 },
-	})
+	const [progress, setProgress] = useState({ current: 0, total: 0 })
 
-	async function save(draft: QuizDraft) {
-		setState({
-			status: "saving",
-			quiz: null,
-			error: null,
-			progress: { current: 0, total: draft.questions.length + 1 },
-		})
+	const mutation = useMutation({
+		mutationFn: async (draft: QuizDraft) => {
+			setProgress({ current: 0, total: draft.questions.length + 1 })
 
-		try {
 			// Step 1: create quiz
 			const quiz = await createQuiz({
 				title: draft.title,
@@ -34,10 +18,7 @@ export function useCreateQuizWithQuestions() {
 				isPublished: draft.isPublished,
 			})
 
-			setState((prev) => ({
-				...prev,
-				progress: { ...prev.progress, current: 1 },
-			}))
+			setProgress({ current: 1, total: draft.questions.length + 1 })
 
 			// Step 2: create questions sequentially
 			for (let i = 0; i < draft.questions.length; i++) {
@@ -62,39 +43,32 @@ export function useCreateQuizWithQuestions() {
 				}
 
 				await createQuestion(quiz.id, input)
-
-				setState((prev) => ({
-					...prev,
-					progress: { ...prev.progress, current: i + 2 },
-				}))
+				setProgress({ current: i + 2, total: draft.questions.length + 1 })
 			}
 
-			setState({
-				status: "success",
-				quiz,
-				error: null,
-				progress: {
-					current: draft.questions.length + 1,
-					total: draft.questions.length + 1,
-				},
-			})
-		} catch (err) {
-			setState((prev) => ({
-				...prev,
-				status: "error",
-				error: err instanceof Error ? err.message : "Failed to save quiz",
-			}))
-		}
+			return quiz
+		},
+		onSettled: () => {
+			// Reset progress when mutation finishes (success or error)
+			setProgress({ current: 0, total: 0 })
+		},
+	})
+
+	function save(draft: QuizDraft) {
+		return mutation.mutateAsync(draft)
 	}
 
 	function reset() {
-		setState({
-			status: "idle",
-			quiz: null,
-			error: null,
-			progress: { current: 0, total: 0 },
-		})
+		mutation.reset()
+		setProgress({ current: 0, total: 0 })
 	}
 
-	return { ...state, save, reset }
+	return {
+		status: mutation.status,
+		quiz: mutation.data as Quiz | undefined,
+		error: mutation.error?.message ?? null,
+		progress,
+		save,
+		reset,
+	}
 }

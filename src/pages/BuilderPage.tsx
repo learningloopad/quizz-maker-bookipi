@@ -153,7 +153,7 @@ export default function BuilderPage() {
           <div className="error-box">{error}</div>
         )}
 
-        {status === "saving" && (
+        {status === "pending" && (
           <div className="progress-box">
             Saving... ({progress.current} / {progress.total})
           </div>
@@ -161,10 +161,10 @@ export default function BuilderPage() {
 
         <button
           onClick={handleSave}
-          disabled={status === "saving"}
+          disabled={status === "pending"}
           className="btn-primary"
         >
-          {status === "saving" ? "Saving..." : "Save Quiz"}
+          {status === "pending" ? "Saving..." : "Save Quiz"}
         </button>
       </div>
     </section>
