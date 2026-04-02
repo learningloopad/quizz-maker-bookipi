@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { MAX_QUESTION } from "@/lib/constants";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function BuilderPage() {
   const [draft, setDraft] = useState<QuizDraft>(createEmptyDraft);
@@ -94,8 +95,8 @@ export default function BuilderPage() {
   // Success state
   if (phase === "done" && quiz) {
     return (
-      <section className="space-y-4">
-        <h2 className="text-2xl font-semibold">Quiz Created!</h2>
+      <section className="space-y-5">
+        <h2 className="text-3xl font-semibold">Quiz Created</h2>
         <Alert>
           <AlertTitle>Success</AlertTitle>
           <AlertDescription>
@@ -116,121 +117,137 @@ export default function BuilderPage() {
 
   return (
     <section className="space-y-6">
-      <h2 className="text-2xl font-semibold">Quiz Builder</h2>
-
-      {/* Quiz metadata */}
-      <div className="space-y-3">
-        <div className="space-y-1">
-          <Label htmlFor="quiz-title">Title</Label>
-          <Input
-            id="quiz-title"
-            value={draft.title}
-            onChange={(e) => updateField("title", e.target.value)}
-            placeholder="e.g. JavaScript Basics"
-            disabled={isSaving}
-          />
-          {errors?.title && (
-            <p className="text-sm text-destructive">{errors.title}</p>
-          )}
-        </div>
-
-        <div className="space-y-1">
-          <Label htmlFor="quiz-description">Description</Label>
-          <Textarea
-            id="quiz-description"
-            value={draft.description}
-            onChange={(e) => updateField("description", e.target.value)}
-            placeholder="What is this quiz about?"
-            rows={3}
-            disabled={isSaving}
-          />
-          {errors?.description && (
-            <p className="text-sm text-destructive">{errors.description}</p>
-          )}
-        </div>
-      </div>
-
-      {/* Questions */}
-      <div className="space-y-3">
-        <h3 className="text-lg font-medium">Questions</h3>
-        {errors?.questions && (
-          <p className="text-sm text-destructive">{errors.questions}</p>
-        )}
-
-        {draft.questions.map((question, index) => (
-          <QuestionCard
-            key={question.id}
-            index={index}
-            question={question}
-            errors={errors?.questionErrors[question.id]}
-            syncStatus={syncMap[question.id]?.status}
-            syncError={syncMap[question.id]?.error}
-            disabled={isSaving}
-            onChange={(updated) => updateQuestion(question.id, updated)}
-            onRemove={() => removeQuestion(question.id)}
-          />
-        ))}
-
-        <div className="flex gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => addQuestion("mcq")}
-            disabled={isSaving || draft.questions.length >= MAX_QUESTION}
-          >
-            + Multiple Choice
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => addQuestion("short")}
-            disabled={isSaving || draft.questions.length >= MAX_QUESTION}
-          >
-            + Short Answer
-          </Button>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          {draft.questions.length} / {MAX_QUESTION} questions
+      <div className="space-y-1">
+        <h2 className="text-3xl font-semibold">Quiz Builder</h2>
+        <p className="text-sm text-muted-foreground">
+          Create a quiz with up to {MAX_QUESTION} questions.
         </p>
       </div>
 
-      {/* Save */}
-      <div className="space-y-3">
-        {globalError && (
-          <Alert variant="destructive">
-            <AlertDescription>{globalError}</AlertDescription>
-          </Alert>
-        )}
-
-        {isSaving && totalQuestions > 0 && (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>
-                {phase === "creating-quiz" && "Creating quiz…"}
-                {phase === "saving-questions" &&
-                  `Saving questions… (${savedCount}/${totalQuestions})`}
-                {phase === "publishing" && "Publishing quiz…"}
-              </span>
-              <span>
-                {Math.round((savedCount / totalQuestions) * 100)}%
-              </span>
-            </div>
-            <Progress value={(savedCount / totalQuestions) * 100} />
+      {/* Quiz metadata */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Quiz Details</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="space-y-1">
+            <Label htmlFor="quiz-title">Title</Label>
+            <Input
+              id="quiz-title"
+              value={draft.title}
+              onChange={(e) => updateField("title", e.target.value)}
+              placeholder="e.g. JavaScript Basics"
+              disabled={isSaving}
+            />
+            {errors?.title && (
+              <p className="text-sm text-destructive">{errors.title}</p>
+            )}
           </div>
-        )}
 
-        {failedCount > 0 && phase === "error" ? (
-          <Button onClick={handleRetry}>
-            Retry Failed ({failedCount})
-          </Button>
-        ) : (
-          <Button onClick={handleSave} disabled={isSaving}>
-            {isSaving ? "Saving…" : "Save Quiz"}
-          </Button>
-        )}
-      </div>
+          <div className="space-y-1">
+            <Label htmlFor="quiz-description">Description</Label>
+            <Textarea
+              id="quiz-description"
+              value={draft.description}
+              onChange={(e) => updateField("description", e.target.value)}
+              placeholder="What is this quiz about?"
+              rows={3}
+              disabled={isSaving}
+            />
+            {errors?.description && (
+              <p className="text-sm text-destructive">{errors.description}</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Questions */}
+      <Card>
+        <CardHeader className="border-b">
+          <CardTitle className="text-base">Questions</CardTitle>
+          <p className="text-xs text-muted-foreground">
+            {draft.questions.length} / {MAX_QUESTION} questions
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4 pt-4">
+          {errors?.questions && (
+            <p className="text-sm text-destructive">{errors.questions}</p>
+          )}
+
+          {draft.questions.map((question, index) => (
+            <QuestionCard
+              key={question.id}
+              index={index}
+              question={question}
+              errors={errors?.questionErrors[question.id]}
+              syncStatus={syncMap[question.id]?.status}
+              syncError={syncMap[question.id]?.error}
+              disabled={isSaving}
+              onChange={(updated) => updateQuestion(question.id, updated)}
+              onRemove={() => removeQuestion(question.id)}
+            />
+          ))}
+
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => addQuestion("mcq")}
+              disabled={isSaving || draft.questions.length >= MAX_QUESTION}
+            >
+              + Multiple Choice
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => addQuestion("short")}
+              disabled={isSaving || draft.questions.length >= MAX_QUESTION}
+            >
+              + Short Answer
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Save */}
+      <Card>
+        <CardContent className="space-y-3 pt-4">
+          {globalError && (
+            <Alert variant="destructive">
+              <AlertDescription>{globalError}</AlertDescription>
+            </Alert>
+          )}
+
+          {isSaving && totalQuestions > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <span>
+                  {phase === "creating-quiz" && "Creating quiz…"}
+                  {phase === "saving-questions" &&
+                    `Saving questions… (${savedCount}/${totalQuestions})`}
+                  {phase === "publishing" && "Publishing quiz…"}
+                </span>
+                <span>
+                  {Math.round((savedCount / totalQuestions) * 100)}%
+                </span>
+              </div>
+              <Progress value={(savedCount / totalQuestions) * 100} />
+            </div>
+          )}
+
+          {failedCount > 0 && phase === "error" ? (
+            <Button onClick={handleRetry}>
+              Retry Failed ({failedCount})
+            </Button>
+          ) : (
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? "Saving…" : "Save Quiz"}
+            </Button>
+          )}
+        </CardContent>
+      </Card>
     </section>
   );
 }

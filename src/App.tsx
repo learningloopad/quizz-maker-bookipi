@@ -1,28 +1,55 @@
-import { Link, Route, Routes } from "react-router-dom";
+import { NavLink, Route, Routes } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import BuilderPage from "./pages/BuilderPage";
 import PlayPage from "./pages/PlayPage";
 import { Button } from "@/components/ui/button";
 
 export default function App() {
+  const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+    isActive
+      ? "bg-secondary text-foreground"
+      : "text-muted-foreground hover:text-foreground";
+
   return (
-    <div className="min-h-screen bg-background">
-      <header className="flex items-center justify-between border-b px-6 py-4 bg-card">
-        <h1 className="text-lg font-semibold">Quiz Maker</h1>
-        <nav className="flex gap-2">
-          <Button variant="ghost" size="sm" render={<Link to="/" />}>
+    <div className="min-h-screen bg-gradient-to-b from-muted/30 via-background to-background">
+      <header className="sticky top-0 z-20 border-b bg-background/90 backdrop-blur-sm">
+        <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
+          <div>
+            <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
+              Take-home Project
+            </p>
+            <h1 className="text-xl font-semibold">Quiz Maker</h1>
+          </div>
+          <nav className="flex gap-2 rounded-lg border bg-card p-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8"
+              render={<NavLink to="/" className={navLinkClass} />}
+            >
             Home
           </Button>
-          <Button variant="ghost" size="sm" render={<Link to="/builder" />}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8"
+              render={<NavLink to="/builder" className={navLinkClass} />}
+            >
             Builder
           </Button>
-          <Button variant="ghost" size="sm" render={<Link to="/play" />}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8"
+              render={<NavLink to="/play" className={navLinkClass} />}
+            >
             Play
           </Button>
-        </nav>
+          </nav>
+        </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-4 py-8">
+      <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/builder" element={<BuilderPage />} />
