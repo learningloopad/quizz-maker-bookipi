@@ -79,13 +79,21 @@ Where events are sent:
 
 ## Setup
 
-### 1) Install dependencies
+### 1) Start the backend API
+
+Run the provided Node.js + SQLite backend first (from the backend project) and keep it running.
+This frontend expects:
+
+- API base URL: `http://localhost:4000`
+- Auth token: `dev-token`
+
+### 2) Install dependencies
 
 ```bash
 pnpm install
 ```
 
-### 2) Configure environment
+### 3) Configure environment
 
 Copy and adjust `.env.example` to `.env`:
 
@@ -100,7 +108,7 @@ VITE_API_BASE_URL=http://localhost:4000
 VITE_API_TOKEN=dev-token
 ```
 
-### 3) Run app
+### 4) Run app
 
 ```bash
 pnpm dev
