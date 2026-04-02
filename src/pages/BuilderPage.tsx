@@ -32,11 +32,14 @@ export default function BuilderPage() {
     isSaving,
     totalQuestions,
     savedCount,
-    failedCount,
     save,
     retry,
     reset,
   } = useSaveQuiz();
+
+  const retryableFailedQuestions = draft.questions.filter(
+    (q) => syncMap[q.id]?.status === "failed",
+  );
 
   function updateField(field: keyof QuizDraft, value: string) {
     setDraft((prev) => ({ ...prev, [field]: value }));
@@ -80,10 +83,7 @@ export default function BuilderPage() {
   }
 
   async function handleRetry() {
-    const failedQuestions = draft.questions.filter(
-      (q) => syncMap[q.id]?.status === "failed",
-    );
-    await retry(failedQuestions);
+    await retry(retryableFailedQuestions);
   }
 
   function handleReset() {
@@ -237,9 +237,9 @@ export default function BuilderPage() {
             </div>
           )}
 
-          {failedCount > 0 && phase === "error" ? (
+          {retryableFailedQuestions.length > 0 && phase === "error" ? (
             <Button onClick={handleRetry}>
-              Retry Failed ({failedCount})
+              Retry Failed ({retryableFailedQuestions.length})
             </Button>
           ) : (
             <Button onClick={handleSave} disabled={isSaving}>

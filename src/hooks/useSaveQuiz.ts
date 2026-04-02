@@ -98,6 +98,7 @@ function buildQuestionInput(
 export function useSaveQuiz() {
   const [state, dispatch] = useReducer(saveReducer, initialSaveState);
   const quizRef = useRef<Quiz | null>(null);
+  const questionPositionsRef = useRef<Record<string, number>>({});
 
   const { phase, syncMap } = state;
 
@@ -114,7 +115,8 @@ export function useSaveQuiz() {
   async function saveQuestionsWithConcurrency(
     quizId: number,
     questions: DraftQuestion[],
-    limit: number
+    limit: number,
+    positionById?: Record<string, number>
   ): Promise<boolean> {
     let hasFailures = false;
 
@@ -124,9 +126,11 @@ export function useSaveQuiz() {
       dispatch({ type: "SET_BATCH_SAVING", ids: batch.map((q) => q.id) });
 
       const results = await Promise.allSettled(
-        batch.map((q) => {
-          const position = questions.indexOf(q);
-          return createQuestion(quizId, buildQuestionInput(q, position));
+        batch.map((q, j) => {
+          const position = positionById?.[q.id] ?? i + j;
+          return Promise.resolve().then(() =>
+            createQuestion(quizId, buildQuestionInput(q, position))
+          );
         })
       );
 
@@ -156,6 +160,9 @@ export function useSaveQuiz() {
   const saveMutation = useMutation({
     mutationFn: async (draft: QuizDraft) => {
       dispatch({ type: "INIT_SAVE", questions: draft.questions });
+      questionPositionsRef.current = Object.fromEntries(
+        draft.questions.map((q, index) => [q.id, index])
+      );
 
       const createdQuiz = await createQuiz({
         title: draft.title,
@@ -169,7 +176,8 @@ export function useSaveQuiz() {
       const hasFailures = await saveQuestionsWithConcurrency(
         createdQuiz.id,
         draft.questions,
-        3
+        3,
+        questionPositionsRef.current
       );
 
       if (hasFailures) {
@@ -204,7 +212,8 @@ export function useSaveQuiz() {
       const hasFailures = await saveQuestionsWithConcurrency(
         quizId,
         failedQuestions,
-        3
+        3,
+        questionPositionsRef.current
       );
 
       if (hasFailures) {
@@ -248,6 +257,7 @@ export function useSaveQuiz() {
   function reset() {
     dispatch({ type: "RESET" });
     quizRef.current = null;
+    questionPositionsRef.current = {};
     resetSave();
     resetRetry();
   }
