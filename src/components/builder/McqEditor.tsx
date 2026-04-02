@@ -62,7 +62,7 @@ export default function McqEditor({ question, errors, onChange, disabled }: Prop
       </div>
 
       <div className="space-y-2">
-        <Label>Options and Correct Answer</Label>
+        <Label>Options (select correct answer)</Label>
         <RadioGroup
           value={
             question.correctAnswer >= 0 ? String(question.correctAnswer) : ""
