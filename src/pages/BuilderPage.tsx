@@ -1,6 +1,14 @@
 import { useState } from "react";
-import type { DraftQuestion, QuizDraft, QuizDraftValidationErrors } from "../types/quiz";
-import { createEmptyDraft, createMcqQuestion, createShortQuestion } from "../utils/draft";
+import type {
+  DraftQuestion,
+  QuizDraft,
+  QuizDraftValidationErrors,
+} from "../types/quiz";
+import {
+  createEmptyDraft,
+  createMcqQuestion,
+  createShortQuestion,
+} from "../utils/draft";
 import { hasErrors, validateQuizDraft } from "../utils/validation";
 import { useCreateQuizWithQuestions } from "../hooks/useCreateQuizWithQuestions";
 import QuestionCard from "../components/builder/QuestionCard";
@@ -24,7 +32,8 @@ export default function BuilderPage() {
   }
 
   function addQuestion(type: "mcq" | "short") {
-    const question = type === "mcq" ? createMcqQuestion() : createShortQuestion();
+    const question =
+      type === "mcq" ? createMcqQuestion() : createShortQuestion();
     setDraft((prev) => ({
       ...prev,
       questions: [...prev.questions, question],
@@ -72,7 +81,10 @@ export default function BuilderPage() {
           <AlertDescription>
             Your quiz <strong>"{quiz.title}"</strong> was saved.
             <br />
-            Quiz ID: <code className="rounded bg-muted px-1.5 py-0.5 text-lg font-semibold">{quiz.id}</code>
+            Quiz ID:{" "}
+            <code className="rounded bg-muted px-1.5 py-0.5 text-lg font-semibold">
+              {quiz.id}
+            </code>
             <br />
             Share this ID with anyone who should take the quiz.
           </AlertDescription>

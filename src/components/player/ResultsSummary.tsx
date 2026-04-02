@@ -34,8 +34,12 @@ export default function ResultsSummary({
 }: Props) {
   const isCodeQuestion = (id: number) =>
     questions.find((q) => q.id === id)?.type === "code";
-  const gradedDetails = result.details.filter((d) => !isCodeQuestion(d.questionId));
-  const pendingDetails = result.details.filter((d) => isCodeQuestion(d.questionId));
+  const gradedDetails = result.details.filter(
+    (d) => !isCodeQuestion(d.questionId)
+  );
+  const pendingDetails = result.details.filter((d) =>
+    isCodeQuestion(d.questionId)
+  );
   const totalQuestions = gradedDetails.length;
   const correctCount = gradedDetails.filter((d) => d.correct).length;
 
@@ -82,14 +86,20 @@ export default function ResultsSummary({
           const userAnswer = answers[detail.questionId] ?? "(no answer)";
           const displayAnswer =
             question?.type === "mcq" && question.options
-              ? question.options[Number(userAnswer)] ?? userAnswer
+              ? (question.options[Number(userAnswer)] ?? userAnswer)
               : userAnswer;
 
           if (isCode) {
             return (
-              <Card key={detail.questionId} className="border-yellow-200 bg-yellow-50/50">
+              <Card
+                key={detail.questionId}
+                className="border-yellow-200 bg-yellow-50/50"
+              >
                 <CardContent className="space-y-1.5">
-                  <Badge variant="outline" className="text-yellow-700 border-yellow-400">
+                  <Badge
+                    variant="outline"
+                    className="text-yellow-700 border-yellow-400"
+                  >
                     Pending Review
                   </Badge>
                   <p className="font-medium">

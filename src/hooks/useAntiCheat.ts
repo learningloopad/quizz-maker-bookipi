@@ -1,64 +1,64 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 
 export type AntiCheatEvent = {
-	type: "window_blur" | "window_focus" | "paste"
-	questionId?: number
-	timestamp: string
-}
+  type: "window_blur" | "window_focus" | "paste";
+  questionId?: number;
+  timestamp: string;
+};
 
 export function useAntiCheat(enabled: boolean) {
-	const [events, setEvents] = useState<AntiCheatEvent[]>([])
+  const [events, setEvents] = useState<AntiCheatEvent[]>([]);
 
-	useEffect(() => {
-		if (!enabled) return
+  useEffect(() => {
+    if (!enabled) return;
 
-		function onBlur() {
-			setEvents((prev) => [
-				...prev,
-				{ type: "window_blur", timestamp: new Date().toISOString() },
-			])
-		}
+    function onBlur() {
+      setEvents((prev) => [
+        ...prev,
+        { type: "window_blur", timestamp: new Date().toISOString() },
+      ]);
+    }
 
-		function onFocus() {
-			setEvents((prev) => [
-				...prev,
-				{ type: "window_focus", timestamp: new Date().toISOString() },
-			])
-		}
+    function onFocus() {
+      setEvents((prev) => [
+        ...prev,
+        { type: "window_focus", timestamp: new Date().toISOString() },
+      ]);
+    }
 
-		window.addEventListener("blur", onBlur)
-		window.addEventListener("focus", onFocus)
+    window.addEventListener("blur", onBlur);
+    window.addEventListener("focus", onFocus);
 
-		function onBeforeUnload(e: BeforeUnloadEvent) {
-			e.preventDefault()
-		}
+    function onBeforeUnload(e: BeforeUnloadEvent) {
+      e.preventDefault();
+    }
 
-		window.addEventListener("beforeunload", onBeforeUnload)
+    window.addEventListener("beforeunload", onBeforeUnload);
 
-		return () => {
-			window.removeEventListener("blur", onBlur)
-			window.removeEventListener("focus", onFocus)
-			window.removeEventListener("beforeunload", onBeforeUnload)
-		}
-	}, [enabled])
+    return () => {
+      window.removeEventListener("blur", onBlur);
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("beforeunload", onBeforeUnload);
+    };
+  }, [enabled]);
 
-	function logPaste(questionId: number) {
-		setEvents((prev) => [
-			...prev,
-			{ type: "paste", questionId, timestamp: new Date().toISOString() },
-		])
-	}
+  function logPaste(questionId: number) {
+    setEvents((prev) => [
+      ...prev,
+      { type: "paste", questionId, timestamp: new Date().toISOString() },
+    ]);
+  }
 
-	function getSummary() {
-		const blurCount = events.filter((e) => e.type === "window_blur").length
-		const focusCount = events.filter((e) => e.type === "window_focus").length
-		const pasteCount = events.filter((e) => e.type === "paste").length
-		return { blurCount, focusCount, pasteCount, total: events.length }
-	}
+  function getSummary() {
+    const blurCount = events.filter((e) => e.type === "window_blur").length;
+    const focusCount = events.filter((e) => e.type === "window_focus").length;
+    const pasteCount = events.filter((e) => e.type === "paste").length;
+    return { blurCount, focusCount, pasteCount, total: events.length };
+  }
 
-	function reset() {
-		setEvents([])
-	}
+  function reset() {
+    setEvents([]);
+  }
 
-	return { events, logPaste, getSummary, reset }
+  return { events, logPaste, getSummary, reset };
 }

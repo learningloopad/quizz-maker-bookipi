@@ -1,4 +1,7 @@
-import type { DraftMcqQuestion, QuestionValidationErrors } from "../../types/quiz";
+import type {
+  DraftMcqQuestion,
+  QuestionValidationErrors,
+} from "../../types/quiz";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -59,7 +62,9 @@ export default function McqEditor({ question, errors, onChange }: Props) {
       <div className="space-y-2">
         <Label>Options (select correct answer)</Label>
         <RadioGroup
-          value={question.correctAnswer >= 0 ? String(question.correctAnswer) : ""}
+          value={
+            question.correctAnswer >= 0 ? String(question.correctAnswer) : ""
+          }
           onValueChange={(val) => selectCorrectAnswer(Number(val))}
         >
           {question.options.map((option, index) => (

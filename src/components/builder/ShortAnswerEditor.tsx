@@ -1,4 +1,7 @@
-import type { DraftShortQuestion, QuestionValidationErrors } from "../../types/quiz";
+import type {
+  DraftShortQuestion,
+  QuestionValidationErrors,
+} from "../../types/quiz";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -9,7 +12,11 @@ type Props = {
   onChange: (updated: DraftShortQuestion) => void;
 };
 
-export default function ShortAnswerEditor({ question, errors, onChange }: Props) {
+export default function ShortAnswerEditor({
+  question,
+  errors,
+  onChange,
+}: Props) {
   return (
     <div className="space-y-3">
       <div className="space-y-1">

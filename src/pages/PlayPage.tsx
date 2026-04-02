@@ -118,7 +118,9 @@ export default function PlayPage() {
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold">Error</h2>
           <Alert variant="destructive">
-            <AlertDescription>No questions found in this quiz.</AlertDescription>
+            <AlertDescription>
+              No questions found in this quiz.
+            </AlertDescription>
           </Alert>
           <Button onClick={handlePlayAgain}>Try Again</Button>
         </section>
@@ -132,7 +134,9 @@ export default function PlayPage() {
     return (
       <section className="space-y-5">
         <div>
-          <h2 className="text-2xl font-semibold">{session.attempt.quiz.title}</h2>
+          <h2 className="text-2xl font-semibold">
+            {session.attempt.quiz.title}
+          </h2>
           <p className="text-sm text-muted-foreground mt-1">
             {session.attempt.quiz.description}
           </p>
@@ -142,7 +146,9 @@ export default function PlayPage() {
           <CardContent className="space-y-4">
             <p className="font-medium">{question.prompt}</p>
 
-            {question.type === "mcq" && "options" in question && question.options ? (
+            {question.type === "mcq" &&
+            "options" in question &&
+            question.options ? (
               <McqAnswerView
                 questionId={question.id}
                 options={question.options}
