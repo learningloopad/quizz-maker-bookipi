@@ -1,5 +1,3 @@
-export type QuestionType = "mcq" | "short" | "code";
-
 export type Quiz = {
   id: number;
   title: string;

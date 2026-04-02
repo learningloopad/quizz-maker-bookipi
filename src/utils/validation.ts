@@ -3,6 +3,7 @@ import type {
   QuizDraftValidationErrors,
   QuestionValidationErrors,
 } from "../types/quiz";
+import { MAX_QUESTION } from "../lib/constants";
 
 export function validateQuizDraft(draft: QuizDraft): QuizDraftValidationErrors {
   const errors: QuizDraftValidationErrors = {
@@ -19,6 +20,8 @@ export function validateQuizDraft(draft: QuizDraft): QuizDraftValidationErrors {
 
   if (draft.questions.length === 0) {
     errors.questions = "Add at least one question";
+  } else if (draft.questions.length > MAX_QUESTION) {
+    errors.questions = `You can add up to ${MAX_QUESTION} questions only`;
   } else {
     const hasMcq = draft.questions.some((q) => q.type === "mcq");
     const hasShort = draft.questions.some((q) => q.type === "short");

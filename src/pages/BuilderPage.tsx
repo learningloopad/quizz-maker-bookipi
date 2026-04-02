@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
+import { MAX_QUESTION } from "@/lib/constants";
 
 export default function BuilderPage() {
   const [draft, setDraft] = useState<QuizDraft>(createEmptyDraft);
@@ -176,7 +177,7 @@ export default function BuilderPage() {
             variant="outline"
             size="sm"
             onClick={() => addQuestion("mcq")}
-            disabled={isSaving}
+            disabled={isSaving || draft.questions.length >= MAX_QUESTION}
           >
             + Multiple Choice
           </Button>
@@ -185,11 +186,14 @@ export default function BuilderPage() {
             variant="outline"
             size="sm"
             onClick={() => addQuestion("short")}
-            disabled={isSaving}
+            disabled={isSaving || draft.questions.length >= MAX_QUESTION}
           >
             + Short Answer
           </Button>
         </div>
+        <p className="text-xs text-muted-foreground">
+          {draft.questions.length} / {MAX_QUESTION} questions
+        </p>
       </div>
 
       {/* Save */}
