@@ -20,6 +20,7 @@ export function createMcqQuestion(): DraftMcqQuestion {
     prompt: "",
     options: ["", ""],
     correctAnswer: -1,
+    syncStatus: "idle",
   };
 }
 
@@ -29,5 +30,6 @@ export function createShortQuestion(): DraftShortQuestion {
     type: "short",
     prompt: "",
     correctAnswer: "",
+    syncStatus: "idle",
   };
 }

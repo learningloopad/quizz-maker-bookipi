@@ -10,19 +10,31 @@ import {
   createShortQuestion,
 } from "../utils/draft";
 import { hasErrors, validateQuizDraft } from "../utils/validation";
-import { useCreateQuizWithQuestions } from "../hooks/useCreateQuizWithQuestions";
+import { useSaveQuiz } from "../hooks/useSaveQuiz";
 import QuestionCard from "../components/builder/QuestionCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
 
 export default function BuilderPage() {
   const [draft, setDraft] = useState<QuizDraft>(createEmptyDraft);
   const [errors, setErrors] = useState<QuizDraftValidationErrors | null>(null);
-  const { status, quiz, error, progress, save, reset } =
-    useCreateQuizWithQuestions();
+  const {
+    phase,
+    quiz,
+    syncMap,
+    globalError,
+    isSaving,
+    totalQuestions,
+    savedCount,
+    failedCount,
+    save,
+    retry,
+    reset,
+  } = useSaveQuiz();
 
   function updateField(field: keyof QuizDraft, value: string) {
     setDraft((prev) => ({ ...prev, [field]: value }));
@@ -65,6 +77,13 @@ export default function BuilderPage() {
     await save(draft);
   }
 
+  async function handleRetry() {
+    const failedQuestions = draft.questions.filter(
+      (q) => syncMap[q.id]?.status === "failed",
+    );
+    await retry(failedQuestions);
+  }
+
   function handleReset() {
     setDraft(createEmptyDraft());
     setErrors(null);
@@ -72,7 +91,7 @@ export default function BuilderPage() {
   }
 
   // Success state
-  if (status === "success" && quiz) {
+  if (phase === "done" && quiz) {
     return (
       <section className="space-y-4">
         <h2 className="text-2xl font-semibold">Quiz Created!</h2>
@@ -107,6 +126,7 @@ export default function BuilderPage() {
             value={draft.title}
             onChange={(e) => updateField("title", e.target.value)}
             placeholder="e.g. JavaScript Basics"
+            disabled={isSaving}
           />
           {errors?.title && (
             <p className="text-sm text-destructive">{errors.title}</p>
@@ -121,6 +141,7 @@ export default function BuilderPage() {
             onChange={(e) => updateField("description", e.target.value)}
             placeholder="What is this quiz about?"
             rows={3}
+            disabled={isSaving}
           />
           {errors?.description && (
             <p className="text-sm text-destructive">{errors.description}</p>
@@ -141,6 +162,9 @@ export default function BuilderPage() {
             index={index}
             question={question}
             errors={errors?.questionErrors[question.id]}
+            syncStatus={syncMap[question.id]?.status}
+            syncError={syncMap[question.id]?.error}
+            disabled={isSaving}
             onChange={(updated) => updateQuestion(question.id, updated)}
             onRemove={() => removeQuestion(question.id)}
           />
@@ -152,6 +176,7 @@ export default function BuilderPage() {
             variant="outline"
             size="sm"
             onClick={() => addQuestion("mcq")}
+            disabled={isSaving}
           >
             + Multiple Choice
           </Button>
@@ -160,6 +185,7 @@ export default function BuilderPage() {
             variant="outline"
             size="sm"
             onClick={() => addQuestion("short")}
+            disabled={isSaving}
           >
             + Short Answer
           </Button>
@@ -168,23 +194,38 @@ export default function BuilderPage() {
 
       {/* Save */}
       <div className="space-y-3">
-        {status === "error" && error && (
+        {globalError && (
           <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>{globalError}</AlertDescription>
           </Alert>
         )}
 
-        {status === "pending" && (
-          <Alert>
-            <AlertDescription>
-              Saving... ({progress.current} / {progress.total})
-            </AlertDescription>
-          </Alert>
+        {isSaving && totalQuestions > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>
+                {phase === "creating-quiz" && "Creating quiz…"}
+                {phase === "saving-questions" &&
+                  `Saving questions… (${savedCount}/${totalQuestions})`}
+                {phase === "publishing" && "Publishing quiz…"}
+              </span>
+              <span>
+                {Math.round((savedCount / totalQuestions) * 100)}%
+              </span>
+            </div>
+            <Progress value={(savedCount / totalQuestions) * 100} />
+          </div>
         )}
 
-        <Button onClick={handleSave} disabled={status === "pending"}>
-          {status === "pending" ? "Saving..." : "Save Quiz"}
-        </Button>
+        {failedCount > 0 && phase === "error" ? (
+          <Button onClick={handleRetry}>
+            Retry Failed ({failedCount})
+          </Button>
+        ) : (
+          <Button onClick={handleSave} disabled={isSaving}>
+            {isSaving ? "Saving…" : "Save Quiz"}
+          </Button>
+        )}
       </div>
     </section>
   );

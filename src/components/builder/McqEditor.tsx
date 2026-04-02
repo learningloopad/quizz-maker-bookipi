@@ -12,9 +12,10 @@ type Props = {
   question: DraftMcqQuestion;
   errors?: QuestionValidationErrors;
   onChange: (updated: DraftMcqQuestion) => void;
+  disabled?: boolean;
 };
 
-export default function McqEditor({ question, errors, onChange }: Props) {
+export default function McqEditor({ question, errors, onChange, disabled }: Props) {
   function updatePrompt(prompt: string) {
     onChange({ ...question, prompt });
   }
@@ -53,6 +54,7 @@ export default function McqEditor({ question, errors, onChange }: Props) {
           onChange={(e) => updatePrompt(e.target.value)}
           placeholder="Enter question prompt..."
           rows={2}
+          disabled={disabled}
         />
         {errors?.prompt && (
           <p className="text-sm text-destructive">{errors.prompt}</p>
@@ -66,6 +68,7 @@ export default function McqEditor({ question, errors, onChange }: Props) {
             question.correctAnswer >= 0 ? String(question.correctAnswer) : ""
           }
           onValueChange={(val) => selectCorrectAnswer(Number(val))}
+          disabled={disabled}
         >
           {question.options.map((option, index) => (
             <div key={index} className="flex items-center gap-2">
@@ -75,6 +78,7 @@ export default function McqEditor({ question, errors, onChange }: Props) {
                 onChange={(e) => updateOption(index, e.target.value)}
                 placeholder={`Option ${index + 1}`}
                 className="flex-1"
+                disabled={disabled}
               />
               {question.options.length > 2 && (
                 <Button
@@ -83,6 +87,7 @@ export default function McqEditor({ question, errors, onChange }: Props) {
                   size="icon-sm"
                   onClick={() => removeOption(index)}
                   title="Remove option"
+                  disabled={disabled}
                 >
                   ✕
                 </Button>
@@ -96,7 +101,7 @@ export default function McqEditor({ question, errors, onChange }: Props) {
         {errors?.correctAnswer && (
           <p className="text-sm text-destructive">{errors.correctAnswer}</p>
         )}
-        <Button type="button" variant="ghost" size="sm" onClick={addOption}>
+        <Button type="button" variant="ghost" size="sm" onClick={addOption} disabled={disabled}>
           + Add option
         </Button>
       </div>

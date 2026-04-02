@@ -19,3 +19,10 @@ export function createQuestion(quizId: number, input: CreateQuestionInput) {
     body: input,
   });
 }
+
+export function publishQuiz(quizId: number) {
+  return apiRequest<Quiz>(`/quizzes/${quizId}`, {
+    method: "PATCH",
+    body: { isPublished: true },
+  });
+}

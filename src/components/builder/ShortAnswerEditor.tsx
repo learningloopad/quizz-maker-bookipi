@@ -10,12 +10,14 @@ type Props = {
   question: DraftShortQuestion;
   errors?: QuestionValidationErrors;
   onChange: (updated: DraftShortQuestion) => void;
+  disabled?: boolean;
 };
 
 export default function ShortAnswerEditor({
   question,
   errors,
   onChange,
+  disabled,
 }: Props) {
   return (
     <div className="space-y-3">
@@ -26,6 +28,7 @@ export default function ShortAnswerEditor({
           onChange={(e) => onChange({ ...question, prompt: e.target.value })}
           placeholder="Enter question prompt..."
           rows={2}
+          disabled={disabled}
         />
         {errors?.prompt && (
           <p className="text-sm text-destructive">{errors.prompt}</p>
@@ -40,6 +43,7 @@ export default function ShortAnswerEditor({
             onChange({ ...question, correctAnswer: e.target.value })
           }
           placeholder="Expected answer (case-insensitive)"
+          disabled={disabled}
         />
         {errors?.correctAnswer && (
           <p className="text-sm text-destructive">{errors.correctAnswer}</p>

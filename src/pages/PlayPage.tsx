@@ -11,11 +11,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
 
 export default function PlayPage() {
   const [quizIdInput, setQuizIdInput] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
-  const { session, start, setAnswer, submit, reset } = useAttemptSession();
+  const { session, start, setAnswer, submit, retry, reset } =
+    useAttemptSession();
   const antiCheat = useAntiCheat(session.phase === "active");
 
   function handleStart() {
@@ -76,19 +78,41 @@ export default function PlayPage() {
         <Alert variant="destructive">
           <AlertDescription>{session.error}</AlertDescription>
         </Alert>
-        <Button onClick={handlePlayAgain}>Try Again</Button>
+        {session.failedAnswers > 0 ? (
+          <Button onClick={retry}>Retry Failed ({session.failedAnswers})</Button>
+        ) : (
+          <Button onClick={handlePlayAgain}>Try Again</Button>
+        )}
       </section>
     );
   }
 
-  // Phase: submitting
-  if (session.phase === "submitting") {
+  // Phase: submitting / grading
+  if (session.phase === "submitting" || session.phase === "grading") {
+    const progressPercent =
+      session.totalAnswers > 0
+        ? (session.savedAnswers / session.totalAnswers) * 100
+        : 0;
+
     return (
       <section className="space-y-4">
         <h2 className="text-2xl font-semibold">Submitting...</h2>
-        <Alert>
-          <AlertDescription>Grading your answers...</AlertDescription>
-        </Alert>
+        {session.phase === "submitting" && session.totalAnswers > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>
+                Submitting answers… ({session.savedAnswers}/{session.totalAnswers})
+              </span>
+              <span>{Math.round(progressPercent)}%</span>
+            </div>
+            <Progress value={progressPercent} />
+          </div>
+        )}
+        {session.phase === "grading" && (
+          <Alert>
+            <AlertDescription>Grading your answers...</AlertDescription>
+          </Alert>
+        )}
       </section>
     );
   }

@@ -123,12 +123,21 @@ export type RecordEventInput = {
   event: string;
 };
 
+export type QuestionSyncStatus =
+  | "idle"
+  | "pending"
+  | "saving"
+  | "saved"
+  | "failed";
+
 export type DraftMcqQuestion = {
   id: string;
   type: "mcq";
   prompt: string;
   options: string[];
   correctAnswer: number;
+  syncStatus: QuestionSyncStatus;
+  syncError?: string;
 };
 
 export type DraftShortQuestion = {
@@ -136,6 +145,8 @@ export type DraftShortQuestion = {
   type: "short";
   prompt: string;
   correctAnswer: string;
+  syncStatus: QuestionSyncStatus;
+  syncError?: string;
 };
 
 export type DraftQuestion = DraftMcqQuestion | DraftShortQuestion;
