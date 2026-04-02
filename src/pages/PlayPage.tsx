@@ -175,8 +175,11 @@ export default function PlayPage() {
     }
 
     const currentAnswer = session.answers[question.id];
-    const answeredCount = Object.keys(session.answers).length;
-    const allAnswered = answeredCount === questions.length;
+    const gradedQuestions = questions.filter((q) => q.type !== "code");
+    const gradedAnsweredCount = gradedQuestions.filter(
+      (q) => session.answers[q.id] !== undefined,
+    ).length;
+    const allGradedAnswered = gradedAnsweredCount === gradedQuestions.length;
 
     return (
       <section className="space-y-5">
@@ -235,10 +238,15 @@ export default function PlayPage() {
 
         <Card>
           <CardContent className="flex items-center justify-between pt-4">
-            <span className="text-sm text-muted-foreground">
-              {answeredCount} / {questions.length} answered
-            </span>
-            <Button onClick={handleSubmit} disabled={!allAnswered}>
+            <div className="text-sm text-muted-foreground">
+              <p>
+                {gradedAnsweredCount} / {gradedQuestions.length} graded answered
+              </p>
+              {gradedQuestions.length !== questions.length && (
+                <p className="text-xs">Code answers are optional for submit.</p>
+              )}
+            </div>
+            <Button onClick={handleSubmit} disabled={!allGradedAnswered}>
               Submit Quiz
             </Button>
           </CardContent>

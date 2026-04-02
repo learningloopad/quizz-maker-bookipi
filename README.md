@@ -1,75 +1,137 @@
-# React + TypeScript + Vite
+# Quiz Maker (Take-home Frontend)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A small React app with two main flows:
 
-Currently, two official plugins are available:
+- Builder: create and publish quizzes with MCQ + short-answer questions.
+- Play: take quizzes by ID and submit answers for grading.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## What Is Implemented
 
-## React Compiler
+### Builder Flow
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+- Create quiz metadata and questions.
+- Max question limit: `20`.
+- A quiz can contain any supported mix of question types (including all-MCQ or all-short).
+- Save behavior uses concurrency-limited batching (`limit = 3`) for creating questions.
+- Per-question sync states in UI: pending, saving, saved, failed.
+- Retry failed question saves only.
+- Quiz is published (`PATCH /quizzes/:id` with `isPublished: true`) only after all questions are saved.
 
-Note: This will impact Vite dev & build performances.
+### Play Flow
 
-## Expanding the ESLint configuration
+- Start attempt by quiz ID.
+- Answer MCQ, short, and code prompts.
+- Submit is gated by graded questions only (MCQ + short). Code-question answers are optional for submit.
+- Submission uses concurrency-limited batching (`limit = 3`) for answer upserts.
+- Progress UI while answers sync.
+- Retry only failed answers.
+- Final grading happens after successful answer sync.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Additional UX/Behavior
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- Basic anti-cheat event logging (blur/focus/paste) during attempts.
+- Responsive, card-based layout across Home, Builder, and Play pages.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Architecture Decisions and Trade-offs
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- React Query mutations for all API writes:
+  - Decision: keep API calls inside domain hooks and execute via `useMutation`.
+  - Trade-off: less flexibility for ad-hoc calls in components, but clearer side-effect boundaries and retry/error lifecycle.
+
+- Concurrency-limited batching (`limit = 3`) for save/submit:
+  - Decision: process requests in small parallel batches instead of sequential or fully parallel.
+  - Trade-off: faster than sequential with lower risk than full parallel spikes; implementation is slightly more complex due to per-item status tracking.
+
+- Retry failed items only:
+  - Decision: preserve successful writes and retry only failed questions/answers.
+  - Trade-off: requires sync-state bookkeeping, but improves UX and avoids duplicate writes.
+
+- Simple local reducer state for sync progress:
+  - Decision: use `useReducer` in hooks for phase + per-item status state.
+  - Trade-off: extra reducer boilerplate, but predictable transitions and easier debugging.
+
+- Intentionally lean scope:
+  - Decision: local hook state and React Query mutations cover all data needs without a global store; UI components stay close to shadcn defaults.
+  - Trade-off: well-matched to a focused two-flow app — adding a global state layer or cache abstraction here would introduce complexity without a clear benefit at this scale.
+
+## Anti-cheat Logging (What and Where)
+
+Logged events in Play mode:
+
+- `blur` when the tab/window loses focus.
+- `focus` when the tab/window regains focus.
+- `paste:question:<id>` when the user pastes into answer inputs.
+
+Where events are sent:
+
+- Endpoint: `POST /attempts/:id/events`
+- Trigger point: during submit flow, before answer upserts/final submit
+- Client implementation: `recordEvent` in `src/api/attempts.ts`, used by `useAttemptSession`
+
+## Tech Stack
+
+- React 19 + TypeScript
+- Vite
+- React Router
+- TanStack Query (`useMutation`) for all API mutations
+- Tailwind CSS + shadcn/ui components
+- ESLint + Prettier
+
+## Setup
+
+### 1) Install dependencies
+
+```bash
+pnpm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2) Configure environment
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Copy and adjust `.env.example` to `.env`:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cp .env.example .env
 ```
+
+Required vars:
+
+```env
+VITE_API_BASE_URL=http://localhost:4000
+VITE_API_TOKEN=dev-token
+```
+
+### 3) Run app
+
+```bash
+pnpm dev
+```
+
+## Scripts
+
+- `pnpm dev` - start dev server
+- `pnpm build` - type-check + production build
+- `pnpm ts-check` - run TypeScript build checks
+- `pnpm lint` - run ESLint
+- `pnpm format` - format `src/` with Prettier
+- `pnpm preview` - preview production build
+
+## API Endpoints Used
+
+- `POST /quizzes`
+- `POST /quizzes/:id/questions`
+- `PATCH /quizzes/:id`
+- `POST /attempts`
+- `POST /attempts/:id/answer`
+- `POST /attempts/:id/submit`
+- `POST /attempts/:id/events`
+
+## Project Structure
+
+- `src/pages` - route pages (`HomePage`, `BuilderPage`, `PlayPage`)
+- `src/hooks` - domain hooks for builder save flow and attempt flow
+- `src/api` - API client and endpoint helpers
+- `src/components/builder` - builder question editors/cards
+- `src/components/player` - play flow question/result components
+- `src/components/ui` - shared UI primitives
+- `src/utils` - draft creation and validation utilities
+- `src/types` - shared API/domain types

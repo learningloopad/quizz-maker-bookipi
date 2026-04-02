@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer } from "react";
+import { useCallback, useReducer } from "react";
 import { useMutation } from "@tanstack/react-query";
 import {
   startAttempt,
@@ -103,19 +103,6 @@ export function useAttemptSession() {
   const failedAnswers = Object.values(answerSyncMap).filter(
     (s) => s.status === "failed"
   ).length;
-  const isSubmitting = submitPhase !== "idle";
-
-  // beforeunload warning while submitting
-  useEffect(() => {
-    if (!isSubmitting) return;
-
-    function handleBeforeUnload(e: BeforeUnloadEvent) {
-      e.preventDefault();
-    }
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [isSubmitting]);
 
   const startMutation = useMutation({
     mutationFn: (quizId: number) => startAttempt({ quizId }),

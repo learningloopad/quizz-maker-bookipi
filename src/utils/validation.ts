@@ -22,14 +22,6 @@ export function validateQuizDraft(draft: QuizDraft): QuizDraftValidationErrors {
     errors.questions = "Add at least one question";
   } else if (draft.questions.length > MAX_QUESTION) {
     errors.questions = `You can add up to ${MAX_QUESTION} questions only`;
-  } else {
-    const hasMcq = draft.questions.some((q) => q.type === "mcq");
-    const hasShort = draft.questions.some((q) => q.type === "short");
-
-    if (!hasMcq || !hasShort) {
-      errors.questions =
-        "Quiz must include at least one MCQ and one short answer question";
-    }
   }
 
   for (const question of draft.questions) {
