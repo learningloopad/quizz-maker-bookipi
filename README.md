@@ -34,10 +34,6 @@ A small React app with two main flows:
 
 ## Architecture Decisions and Trade-offs
 
-- React Query mutations for all API writes:
-  - Decision: keep API calls inside domain hooks and execute via `useMutation`.
-  - Trade-off: less flexibility for ad-hoc calls in components, but clearer side-effect boundaries and retry/error lifecycle.
-
 - Concurrency-limited batching (`limit = 3`) for save/submit:
   - Decision: process requests in small parallel batches instead of sequential or fully parallel.
   - Trade-off: faster than sequential with lower risk than full parallel spikes; implementation is slightly more complex due to per-item status tracking.
@@ -54,7 +50,7 @@ A small React app with two main flows:
   - Decision: local hook state and React Query mutations cover all data needs without a global store; UI components stay close to shadcn defaults.
   - Trade-off: well-matched to a focused two-flow app — adding a global state layer or cache abstraction here would introduce complexity without a clear benefit at this scale.
 
-## Anti-cheat Logging (What and Where)
+## Anti-cheat Logging
 
 Logged events in Play mode:
 
@@ -73,7 +69,7 @@ Where events are sent:
 - React 19 + TypeScript
 - Vite
 - React Router
-- TanStack Query (`useMutation`) for all API mutations
+- TanStack Query
 - Tailwind CSS + shadcn/ui components
 - ESLint + Prettier
 
