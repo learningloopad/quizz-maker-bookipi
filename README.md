@@ -1,4 +1,4 @@
-# Quiz Maker (Take-home Frontend)
+# Quiz Maker
 
 A small React app with two main flows:
 
