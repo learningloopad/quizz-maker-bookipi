@@ -91,6 +91,8 @@ This frontend expects:
 
 ```bash
 pnpm install
+# or
+npm install
 ```
 
 ### 3) Configure environment
@@ -112,16 +114,18 @@ VITE_API_TOKEN=dev-token
 
 ```bash
 pnpm dev
+# or
+npm run dev
 ```
 
 ## Scripts
 
-- `pnpm dev` - start dev server
-- `pnpm build` - type-check + production build
-- `pnpm ts-check` - run TypeScript build checks
-- `pnpm lint` - run ESLint
-- `pnpm format` - format `src/` with Prettier
-- `pnpm preview` - preview production build
+- `pnpm dev` or `npm run dev` - start dev server
+- `pnpm build` or `npm run build` - type-check + production build
+- `pnpm ts-check` or `npm run ts-check` - run TypeScript build checks
+- `pnpm lint` or `npm run lint` - run ESLint
+- `pnpm format` or `npm run format` - format `src/` with Prettier
+- `pnpm preview` or `npm run preview` - preview production build
 
 ## API Endpoints Used
 
